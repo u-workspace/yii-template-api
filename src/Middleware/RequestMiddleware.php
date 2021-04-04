@@ -4,11 +4,13 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Helper\Request\Access;
+use App\Helper\Request\Request;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Yiisoft\ActiveRecord\ActiveRecordFactory;
+use Yiisoft\Arrays\ArrayHelper;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
 use Yiisoft\Factory\Exceptions\InvalidConfigException;
 
@@ -24,6 +26,7 @@ final class RequestMiddleware implements MiddlewareInterface
     public function __construct(
         private DataResponseFactoryInterface $dataResponseFactory,
         private Access $access,
+        private Request $request,
         private ActiveRecordFactory $activeRecordFactory,
     )
     {
@@ -52,6 +55,9 @@ final class RequestMiddleware implements MiddlewareInterface
         }
 
         $this->access->setAccess($token, $role, $this->activeRecordFactory);
+        $this->request->setExpand(
+            explode(",", str_replace(" ", "", ArrayHelper::getValue($request->getQueryParams(), 'expand', '')))
+        );
 
         return $handler->handle($request);
     }

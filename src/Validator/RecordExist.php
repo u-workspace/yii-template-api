@@ -19,7 +19,7 @@ class RecordExist extends Rule
     /**
      * @var string
      */
-    private string $message = '{{entity}} does not exist.';
+    private string $message = 'Data does\'t exists';
 
     /**
      * @var callable $appendQuery
@@ -30,6 +30,16 @@ class RecordExist extends Rule
      * @var callable $callback
      */
     private $callback;
+
+    /**
+     * @var bool
+     */
+    private bool $reverse = false;
+
+    /**
+     * @var bool
+     */
+    private bool $onlyExists = false;
 
     /**
      * RecordExist constructor.
@@ -49,14 +59,22 @@ class RecordExist extends Rule
 
     protected function validateValue($value, ValidationContext $context = null): Result
     {
+
         $result = new Result();
         $query = $this->activeRecordFactory->createQueryTo($this->entityName)->andWhere([$this->identity => $value]);
         if($this->appendQuery) {
             $query = ($this->appendQuery)($query);
         }
-        $record = $query->one();
-        if ($this->isEmpty($record)) {
-            $result->addError(str_replace("{{entity}}", $this->entityName, $this->message));
+        $record = $this->onlyExists ? $query->exists() : $query->one();
+
+        $status = is_bool($record) ? !($record) : $this->isEmpty($record);
+
+        if($this->reverse) {
+            $status = !$status;
+        }
+
+        if ($status) {
+            $result->addError($this->message);
             return $result;
         }
 
@@ -71,6 +89,25 @@ class RecordExist extends Rule
         return $result;
     }
 
+    /**
+     * @return $this
+     */
+    public function reverse(): self
+    {
+        $new = clone $this;
+        $new->reverse = true;
+        return $new;
+    }
+
+    /**
+     * @return $this
+     */
+    public function onlyExists(): self
+    {
+        $new = clone $this;
+        $new->onlyExists = true;
+        return $new;
+    }
 
     /**
      * @param callable $appendQuery
@@ -91,6 +128,17 @@ class RecordExist extends Rule
     {
         $new = clone $this;
         $new->callback = $callback;
+        return $new;
+    }
+
+    /**
+     * @param string $message
+     * @return $this
+     */
+    public function setErrorMessage(string $message): self
+    {
+        $new = clone $this;
+        $new->message = $message;
         return $new;
     }
 

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Formatter;
 
 use App\Factory\ApiResponseDataFactory;
+use App\Helper\Request\Request;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\ActiveRecord\ActiveRecord;
+use Yiisoft\Arrays\ArrayableTrait;
 use Yiisoft\Arrays\ArrayHelper;
 use App\Data\OffsetPaginator;
 use Yiisoft\Data\Paginator\PaginatorException;
@@ -18,16 +20,19 @@ final class ApiResponseFormatter implements DataResponseFormatterInterface
 {
     private ApiResponseDataFactory $apiResponseDataFactory;
     private JsonDataResponseFormatter $jsonDataResponseFormatter;
+    private Request $request;
 
     /**
      * ApiResponseFormatter constructor.
      * @param ApiResponseDataFactory $apiResponseDataFactory
      * @param JsonDataResponseFormatter $jsonDataResponseFormatter
+     * @param Request $request
      */
-    public function __construct(ApiResponseDataFactory $apiResponseDataFactory, JsonDataResponseFormatter $jsonDataResponseFormatter)
+    public function __construct(ApiResponseDataFactory $apiResponseDataFactory, JsonDataResponseFormatter $jsonDataResponseFormatter, Request $request)
     {
         $this->apiResponseDataFactory = $apiResponseDataFactory;
         $this->jsonDataResponseFormatter = $jsonDataResponseFormatter;
+        $this->request = $request;
     }
 
     /**
@@ -42,7 +47,8 @@ final class ApiResponseFormatter implements DataResponseFormatterInterface
             $items = [];
             try {
                 foreach ($data->read() as $item) {
-                    $items[] = is_array($item) ? $item : $item->toArray();
+                    /* @var $item ArrayableTrait */
+                    $items[] = is_array($item) ? $item : $item->toArray(expand: $this->request->getExpand());
                 }
             } catch (PaginatorException $paginatorException) {
                 // catch the exception and make sure it is handle it with empty list.
@@ -63,7 +69,7 @@ final class ApiResponseFormatter implements DataResponseFormatterInterface
                 ]))->toArray(),
             ));
         } else if ($data instanceof ActiveRecord) {
-            $dataResponse = $dataResponse->withData($dataResponse->getData()->toArray());
+            $dataResponse = $dataResponse->withData($dataResponse->getData()->toArray(expand: $this->request->getExpand()));
             $response = $dataResponse->withData(
                 $this->apiResponseDataFactory->createFromResponse($dataResponse)->toArray()
             );

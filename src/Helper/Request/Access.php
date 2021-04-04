@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Helper\Request;
 
-use App\Dto\PlatformAccess;
 use App\Helper\JWT\JWT;
 use Yiisoft\ActiveRecord\ActiveRecordFactory;
 use Yiisoft\Arrays\ArrayHelper;
@@ -39,8 +38,6 @@ class Access
 
             }
         }
-
-        $this->platformAccess = new PlatformAccess($this);
     }
 
     /**

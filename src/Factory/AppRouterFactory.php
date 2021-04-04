@@ -46,6 +46,7 @@ class AppRouterFactory
     {
         return [
             ...(require $aliases->get('@src/Factory/Route/status.php')),
+            ...(require $aliases->get('@src/Factory/Route/item.php')),
         ];
     }
 }
