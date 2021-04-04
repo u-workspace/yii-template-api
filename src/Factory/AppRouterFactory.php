@@ -27,11 +27,12 @@ class AppRouterFactory
         $aliases = $container->get(Aliases::class);
 
         $collector->addGroup(
-            Group::create(null, $this->getRoutes($aliases))
-                ->addMiddleware(ExceptionMiddleware::class)
-                ->addMiddleware(RequestMiddleware::class)
-                ->addMiddleware(FormatDataResponse::class)
-                ->addMiddleware(RequestBodyParser::class)
+            Group::create()
+                ->middleware(RequestMiddleware::class)
+                ->middleware(FormatDataResponse::class)
+                ->middleware(RequestBodyParser::class)
+                ->middleware(ExceptionMiddleware::class)
+                ->routes(...$this->getRoutes($aliases))
         );
 
         return new UrlMatcher(new RouteCollection($collector));
@@ -44,7 +45,7 @@ class AppRouterFactory
     private function getRoutes(Aliases $aliases): array
     {
         return [
-            ...(require $aliases->get('@src/Factory/Route/sample.php')),
+            ...(require $aliases->get('@src/Factory/Route/status.php')),
         ];
     }
 }

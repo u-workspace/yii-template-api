@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Endpoint\Sample;
+namespace App\Endpoint\Status;
 
 use Yiisoft\DataResponse\DataResponse;
 use Yiisoft\DataResponse\DataResponseFactoryInterface;
@@ -16,6 +16,9 @@ class Action
         DataResponseFactoryInterface $dataResponseFactory
     )
     {
-        return $dataResponseFactory->createResponse([]);
+        return $dataResponseFactory->createResponse([
+            'status' => true,
+            'message' => 'health'
+        ]);
     }
 }
