@@ -9,4 +9,7 @@ return [
         'password' => '',
     ],
     "sentry/dsn" => '',
+    "database/schemas" => [
+        "main" => ""
+    ]
 ];

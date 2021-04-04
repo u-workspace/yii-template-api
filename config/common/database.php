@@ -28,4 +28,10 @@ return [
             \Yiisoft\Factory\Definitions\Reference::to(\Psr\Log\LoggerInterface::class)
         ]
     ],
+    \App\Model\Schema::class => [
+        '__class' => \App\Model\Schema::class,
+        '__construct()' => [
+            'schemas' => $params['database/schemas']
+        ]
+    ]
 ];
